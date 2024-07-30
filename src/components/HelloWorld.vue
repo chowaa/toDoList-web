@@ -22,7 +22,7 @@ const valueRef = ref<TodoDto[]>()
 // 接受calendar组件的值
 const calendarRef = ref(new Date())
 // 转换成“yyyy-mm-dd”格式
-const selectDateValueRef = ref('' || new Date().toISOString())
+const selectDateValueRef = ref('')
 const changeDate = (date: Date):string => {
   const _date = new Date(date);
   return _date.toLocaleDateString('zh-CN', {
