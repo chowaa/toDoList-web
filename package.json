@@ -22,20 +22,13 @@
   "devDependencies": {
     "@eslint/js": "^9.7.0",
     "@types/node": "^22.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.17.0",
-    "@typescript-eslint/parser": "^7.17.0",
     "@vitejs/plugin-vue": "^5.0.5",
-    "concurrently": "^8.2.2",
     "electron": "^31.3.1",
     "electron-builder": "^24.13.3",
     "element-plus": "^2.7.7",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-vue": "^9.27.0",
     "globals": "^15.8.0",
-    "prettier": "^3.3.3",
     "typescript": "^5.2.2",
     "typescript-eslint": "^7.17.0",
     "unplugin-auto-import": "^0.18.1",
@@ -43,8 +36,7 @@
     "vite": "^5.3.4",
     "vite-plugin-electron": "^0.28.7",
     "vite-plugin-eslint": "^1.8.1",
-    "vue-tsc": "^2.0.24",
-    "wait-on": "^7.2.0"
+    "vue-tsc": "^2.0.24"
   },
   "eslintIgnore": [
     "dist/",
