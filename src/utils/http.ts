@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3002/api', // 将模型接口地址替换为实际地址
+  baseURL: 'http://localhost:3000', // 将模型接口地址替换为实际地址
   timeout: 50000, // 可选的超时配置
   headers: {
     'Content-Type': 'application/json',

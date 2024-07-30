@@ -1,41 +1,42 @@
 <script setup lang="ts">
+import { getTodoListApi } from '../api'
 import { ref } from 'vue'
 
-defineProps<{ msg: string }>()
+interface TodoDto {
+  title: string
+  content: string
+  createdAt: string
+  effectiveTime: string
+  isCompleted: boolean
+  completedTime: string
+}
 
-const count = ref(0)
+const response = async ()=> {
+  const res = await getTodoListApi()
+  console.log(res.data.data)
+  valueRef.value = res.data.data
+  // return res.data.data
+}
+
+const valueRef = ref<TodoDto[]>()
+// console.log(response())
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
-
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>components/HelloWorld.vue</code> to test HMR
-    </p>
+  <div>
+    1111
+    <el-button @click="response">开始</el-button>
+    <div v-for="(item, index) in valueRef" :key="index">
+      <div>{{ item.title }}</div>
+      <div>{{ item.completedTime }}</div>
+      <div>{{ item.createdAt }}</div>
+      <div>{{ item.effectiveTime }}</div>
+      <div>{{ item.completedTime }}</div>
+      <div>{{ item.isCompleted }}</div>
+    </div>
+<!--    <div>{{ valueRef }}</div>-->
   </div>
-
-  <p>
-    Check out
-    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
-      >create-vue</a
-    >, the official Vue + Vite starter
-  </p>
-  <p>
-    Learn more about IDE Support for Vue in the
-    <a
-      href="https://vuejs.org/guide/scaling-up/tooling.html#ide-support"
-      target="_blank"
-      >Vue Docs Scaling up Guide</a
-    >.
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
 </template>
 
 <style scoped>
-.read-the-docs {
-  color: #888;
-}
 </style>

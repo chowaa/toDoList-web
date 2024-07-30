@@ -1,8 +1,8 @@
 import axios from '../utils/http.ts'
 
-export const getIndex = () => {
+export const getTodoListApi = () => {
   return axios({
-    url: '',
+    url: '/todoList',
     method: 'get'
   })
 }
