@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getTodoListApi } from '../api'
 import { ref, watch, reactive } from 'vue'
+import _lodash from 'lodash'
 
 interface TodoDto {
   title: string
@@ -11,47 +12,66 @@ interface TodoDto {
   completedTime: string
 }
 
-const response = async ()=> {
-  const res = await getTodoListApi()
-  console.log(res.data.data)
-  valueRef.value = res.data.data
+const valueRef = ref<TodoDto[]>([])
+
+const response = async () => {
+  try {
+    const res = await getTodoListApi()
+    console.log(res.data.data)
+    valueRef.value = res.data.data
+  } catch (error) {
+    console.error('Failed to fetch todo list:', error)
+  }
 }
 
-const valueRef = ref<TodoDto[]>()
-
-// 接受calendar组件的值
 const calendarRef = ref(new Date())
-// 转换成“yyyy-mm-dd”格式
 const selectDateValueRef = ref('')
-const changeDate = (date: Date):string => {
-  const _date = new Date(date);
-  return _date.toLocaleDateString('zh-CN', {
+
+const changeDate = (date: Date): string => {
+  return date.toLocaleDateString('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
   }).replace(/\//g, '-')
 }
+
 watch(calendarRef, (newValue, oldValue) => {
-  if (newValue!== oldValue) {
+  if (newValue !== oldValue) {
     selectDateValueRef.value = changeDate(newValue)
   }
-}, { immediate: false })
+})
 
-let isCalendarBtnActive = ref(false)
-// interface DateCellData {
-//   day: string;
-//   date: Date;
-//   isSelected: boolean;
-//   isToday: boolean;
-// }
-const changeCalendarBtnActive = () => {
-  isCalendarBtnActive.value = !isCalendarBtnActive.value
+const isCalendarBtnActive = ref(false)
+interface DateCellData {
+  day: string;
+  date: Date;
+  isSelected: boolean;
+  isToday: boolean;
+}
+let oldData: DateCellData | null = null
+
+const setCalendarHeight = (isActive: boolean) => {
   document.documentElement.style.setProperty(
     '--calendar-selected-height',
-    isCalendarBtnActive.value ? '300px' : '85px',
+    isActive ? "70vh" : '85px',
     'important'
-  )
-}
+  );
+};
+
+const changeCalendarBtnActive = async (data: DateCellData) => {
+  console.log(oldData, data);
+
+  if (_lodash.isEqual(oldData, data)) {
+    isCalendarBtnActive.value = false;
+    oldData = null;
+    setCalendarHeight(isCalendarBtnActive.value);
+    return;
+  }
+
+  isCalendarBtnActive.value = true;
+  setCalendarHeight(isCalendarBtnActive.value);
+  oldData = data;
+};
 
 const createTodoListForm = reactive<TodoDto>({
   title: '',
@@ -68,7 +88,7 @@ const createTodoListForm = reactive<TodoDto>({
   <div class="container">
     <el-calendar v-model="calendarRef">
       <template #date-cell="{ data }">
-        <div @click="changeCalendarBtnActive">
+        <div @click="changeCalendarBtnActive(data)">
           <p :class="data.isSelected ? 'is-selected-p' : ''">
             {{ data.day.split("-").slice(2).join("-") }}
             {{ data.isSelected ? '✔️' : '' }}
@@ -111,7 +131,6 @@ $width-content: 500px;
   :deep(.current,) {
     overflow: auto;
     width: 100%;
-    height: 85px !important;
   }
   :deep(.el-calendar-table__row) {
     height: 85px;
@@ -129,9 +148,7 @@ $width-content: 500px;
     .calendar-dropDown-content {
       position: relative;
       right: calc(($width-content/7)*3);
-      //width: $width-content;
     }
   }
 }
-
 </style>
