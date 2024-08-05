@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+// import HelloWorld from './components/HelloWorld.vue'
+import Calendar from './views/calendar/calendar.vue'
 </script>
 
 <template>
-  <HelloWorld/>
+<!--  <HelloWorld/>-->
+  <Calendar />
 </template>
 
 <style scoped>

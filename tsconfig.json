@@ -21,7 +21,7 @@
     "noFallthroughCasesInSwitch": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["vite/client", "./auto-imports.d.ts"],
+    "types": ["vite/client", "./auto-imports.d.ts", "vuetify"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
