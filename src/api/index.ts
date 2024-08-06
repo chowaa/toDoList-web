@@ -7,10 +7,19 @@ export const getTodoListApi = () => {
   })
 }
 
-export const getTags = () => {
+export interface TodoDto {
+  title: string
+  content: string
+  createdAt: Date | null
+  effectiveTime: string
+  isCompleted: boolean
+  completedTime: Date | null
+}
+export const createTodoList = (data:TodoDto) => {
   return axios({
-    url: '/tags',
-    method: 'get'
+    url: '/todoList/createTodoList',
+    method: 'post',
+    data: data
   })
 }
 

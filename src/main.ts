@@ -6,7 +6,9 @@ import { createPinia } from 'pinia'
 import 'vuetify/styles'
 import vuetify from './plugins/vuetify'
 import '@mdi/font/css/materialdesignicons.css'
-// import ElementPlus from 'element-plus'
-// import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import ElementPlus from 'element-plus'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
 
-createApp(App).use(router).use(createPinia()).use(vuetify).mount('#app')
+createApp(App).use(router).use(createPinia()).use(ElementPlus, {
+  locale: zhCn,
+}).use(vuetify).mount('#app')

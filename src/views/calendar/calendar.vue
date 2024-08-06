@@ -10,21 +10,59 @@ $day-tips-w-h : 10px;
     border-radius: calc($day-tips-w-h/2);
   }
 }
-//:deep(.v-calendar-weekly__day-alldayevents-container) {
-//  display: flex;
-//  flex-direction: column;
-//  align-items: center;
-//}
 
 </style>
 
 <template>
   <div>
     <v-sheet :elevation="14" width="80vw" rounded>
-<!--      <v-stepper-header>-->
-<!--        <v-select v-model="type" :items="types" class="ma-2" label="查看模式" variant="outlined" dense hide-details></v-select>-->
-<!--        <v-select v-model="weekday" :items="weekdays" class="ma-2" label="工作日" variant="outlined" dense hide-details></v-select>-->
-<!--      </v-stepper-header>-->
+      <v-stepper-header></v-stepper-header>
+
+      <v-sheet style="display: inline-flex;align-items: center;flex-direction: row;">
+        <v-select v-model="type" :items="types" class="ma-2" label="查看模式" variant="outlined" width="150px" dense hide-details></v-select>
+        <v-btn @click="changeAddStatus">添加待办事项</v-btn>
+      </v-sheet>
+
+      <v-sheet>
+        <v-expansion-panels v-model="addStatus" variant="inset">
+          <v-expansion-panel title="" text="" value="addStatus">
+            <v-expansion-panel-text>
+              <v-form ref="todoFormRef" @submit.prevent="addTodoList">
+                <v-container>
+                  <v-text-field
+                    v-model="addTodoListForm.title"
+                    label="title"
+                    hide-details
+                    required
+                    :rules="todoFormRules.title"
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="addTodoListForm.content"
+                    label="content"
+                    hide-details
+                    required
+                    :rules="todoFormRules.content"
+                  ></v-text-field>
+                  <el-date-picker
+                    v-model="addTodoListForm.createdAt"
+                    :rules="todoFormRules.createdAt"
+                    type="datetime"
+                    placeholder="Select date and time"
+                  />
+                  <el-date-picker
+                    v-model="addTodoListForm.completedTime"
+                    :rules="todoFormRules.completedTime"
+                    type="datetime"
+                    placeholder="Select date and time"
+                  />
+                </v-container>
+                <v-btn class="me-4" type="submit">添加</v-btn>
+              </v-form>
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-sheet>
+
       <v-calendar
         ref="calendar"
         v-model="value"
@@ -35,7 +73,7 @@ $day-tips-w-h : 10px;
         <template #event="{ event }">
           <div class="event-content">
             <div class="day-tips" :style="{ background: event.color as string }"></div>
-            <span>{{ event.title }}</span>
+            <span>&nbsp;&nbsp;{{ event.title }}</span>
           </div>
         </template>
       </v-calendar>
@@ -45,74 +83,29 @@ $day-tips-w-h : 10px;
 
 <script setup lang="ts">
 import { VCalendar } from 'vuetify/labs/VCalendar'
-import { onMounted, ref } from 'vue'
-import { useDate } from 'vuetify'
-import { getTodoListApi } from '../../api'
+import { VForm } from 'vuetify/components'
+import { onMounted, reactive, ref } from 'vue'
+import { getTodoListApi, createTodoList, TodoDto } from '../../api'
 
 interface Event {
-  title: string;
-  start: Date;
-  end: Date;
-  color: string;
-  allDay: boolean;
+  title: string
+  start: Date
+  end: Date
+  color: string
+  allDay: boolean
   isCompleted?: boolean
   content?: string
 }
 
-// interface Weekday {
-//   title: string;
-//   value: number[];
-// }
-
-interface TodoDto {
-  title: string
-  content: string
-  createdAt: string
-  effectiveTime: string
-  isCompleted: boolean
-  completedTime: string
-}
-
-// const valueRef = ref<TodoDto[]>([])
-
-const response = async () => {
-  try {
-    const res = await getTodoListApi()
-    console.log(res.data.data)
-    return res.data.data
-  } catch (error) {
-    console.error('Failed to fetch todo list:', error)
-  }
-}
-
-const type = ref<'month' | 'week' | 'day'>('month');
-// const types = ['month', 'week', 'day'];
-const weekday = ref<number[]>([0, 1, 2, 3, 4, 5, 6]);
-// const weekdays: Weekday[] = [
-//   { title: '日 - 六', value: [0, 1, 2, 3, 4, 5, 6] },
-//   { title: '一 - 日', value: [1, 2, 3, 4, 5, 6, 0] },
-//   { title: '一 - 五', value: [1, 2, 3, 4, 5] },
-//   { title: '一, 三, 五', value: [1, 3, 5] },
-// ];
-const value = ref<Date[]>([new Date()]);
-const events = ref<Event[]>([]);
-const colors = ['blue', 'indigo', 'purple', 'cyan', 'green', 'orange', 'grey'];
-// const titles = ['会议', '假期', 'PTO', '旅行', '事件', '生日', '会议', '派对'];
-
-const formatDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const parseDate = (dateString: string): Date => {
-  const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day); // 月份从 0 开始
-};
+const type = ref<'month' | 'week' | 'day'>('month')
+const types = ['month', 'week', 'day'];
+const weekday = ref<number[]>([0, 1, 2, 3, 4, 5, 6])
+const value = ref<Date[]>([new Date()])
+const events = ref<Event[]>([])
+const colors = ['blue', 'indigo', 'purple', 'cyan', 'green', 'orange', 'grey']
 
 const getEvents = async ({ start, end }: { start: Date; end: Date }) => {
-  const eventsList: Event[] = [];
+  const eventsList: Event[] = []
 
   console.log(start, end)
 
@@ -121,32 +114,83 @@ const getEvents = async ({ start, end }: { start: Date; end: Date }) => {
   result.data.data.map((todo: TodoDto) => {
     eventsList.push({
       title: todo.title,
-      start: new Date(todo.createdAt), // 将 createdAt 转换为 Date 对象
-      end: new Date(todo.completedTime), // 将 completedTime 转换为 Date 对象
+      start: new Date(todo.createdAt as Date), // 将 createdAt 转换为 Date 对象
+      end: new Date(todo.completedTime as Date), // 将 completedTime 转换为 Date 对象
       color: colors[rnd(0, colors.length - 1)], // 根据需要设置颜色
       allDay: false, // 根据需要设置是否为全天事件
       isCompleted: todo.isCompleted,
       content: todo.content
     })
   })
-  events.value = eventsList;
-};
-
-const getEventColor = (event: Event) => {
-  console.log(event)
-  return event.color;
-};
+  console.log(eventsList)
+  events.value = eventsList
+}
 
 const rnd = (a: number, b: number) => {
-  return Math.floor((b - a + 1) * Math.random()) + a;
-};
+  return Math.floor((b - a + 1) * Math.random()) + a
+}
+
+const addStatus = ref<['addStatus'] | []>([])
+const addTodoListForm = reactive<TodoDto>({
+  title: '',
+  content: '',
+  createdAt: null,
+  effectiveTime: '',
+  isCompleted: false,
+  completedTime: null
+})
+const changeAddStatus = () => {
+  addStatus.value[0] === 'addStatus' ? addStatus.value = [] : addStatus.value[0] = 'addStatus'
+}
+const todoFormRules = {
+  title: [
+    (value:string) => {
+      if (value) return true
+      return '必填'
+    }
+  ],
+  content: [
+    (value:string) => {
+      if (value) return true
+      return '必填'
+    }
+  ],
+  createdAt: [
+    (value:Date) => {
+      return !!value;
+    }
+  ],
+  completedTime: [
+    (value:Date) => {
+      return !!value;
+    }
+  ]
+}
+
+const todoFormRef = ref<VForm | null>(null)
+
+const addTodoList = async () => {
+  const { valid } = await todoFormRef.value!.validate()
+  if (valid) {
+    createTodoList(addTodoListForm).then(res => {
+      if (res.data.code === 200) {
+        changeAddStatus()
+        updateTodolist()
+      } else {
+        alert(res.data.message)
+      }
+    })
+  }
+}
+
+const updateTodolist = () => {
+  getEvents({
+    start: new Date(),
+    end: new Date()
+  })
+}
 
 onMounted(() => {
-  const adapter = useDate();
-  response()
-  getEvents({
-    start: adapter.startOfDay(adapter.startOfMonth(new Date())) as Date,
-    end: adapter.endOfDay(adapter.endOfMonth(new Date())) as Date
-  });
-});
+  updateTodolist()
+})
 </script>
