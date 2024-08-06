@@ -7,10 +7,9 @@ $day-tips-w-h : 10px;
   .day-tips {
     width: $day-tips-w-h;
     height: $day-tips-w-h;
-    border-radius: calc($day-tips-w-h/2);
+    border-radius: calc($day-tips-w-h / 2);
   }
 }
-
 </style>
 
 <template>
@@ -18,7 +17,7 @@ $day-tips-w-h : 10px;
     <v-sheet :elevation="14" width="80vw" rounded>
       <v-stepper-header></v-stepper-header>
 
-      <v-sheet style="display: inline-flex;align-items: center;flex-direction: row;">
+      <v-sheet style="display: inline-flex; align-items: center; flex-direction: row;">
         <v-select v-model="type" :items="types" class="ma-2" label="查看模式" variant="outlined" width="150px" dense hide-details></v-select>
         <v-btn @click="changeAddStatus">添加待办事项</v-btn>
       </v-sheet>
@@ -73,7 +72,7 @@ $day-tips-w-h : 10px;
         <template #event="{ event }">
           <div class="event-content">
             <div class="day-tips" :style="{ background: event.color as string }"></div>
-            <span>&nbsp;&nbsp;{{ event.title }}</span>
+            <span>&nbsp;&nbsp;{{ truncateTitle(event.title as string, 5) }}</span>
           </div>
         </template>
       </v-calendar>
@@ -98,7 +97,7 @@ interface Event {
 }
 
 const type = ref<'month' | 'week' | 'day'>('month')
-const types = ['month', 'week', 'day'];
+const types = ['month', 'week', 'day']
 const weekday = ref<number[]>([0, 1, 2, 3, 4, 5, 6])
 const value = ref<Date[]>([new Date()])
 const events = ref<Event[]>([])
@@ -111,7 +110,7 @@ const getEvents = async ({ start, end }: { start: Date; end: Date }) => {
 
   const result = await getTodoListApi()
 
-  result.data.data.map((todo: TodoDto) => {
+  result.data.data.forEach((todo: TodoDto) => {
     eventsList.push({
       title: todo.title,
       start: new Date(todo.createdAt as Date), // 将 createdAt 转换为 Date 对象
@@ -122,9 +121,12 @@ const getEvents = async ({ start, end }: { start: Date; end: Date }) => {
       content: todo.content
     })
   })
-  console.log(eventsList)
   events.value = eventsList
 }
+
+const truncateTitle = (title: string, maxLength: number): string => {
+  return title.length > maxLength ? title.slice(0, maxLength) + '...' : title;
+};
 
 const rnd = (a: number, b: number) => {
   return Math.floor((b - a + 1) * Math.random()) + a
@@ -143,34 +145,16 @@ const changeAddStatus = () => {
   addStatus.value[0] === 'addStatus' ? addStatus.value = [] : addStatus.value[0] = 'addStatus'
 }
 const todoFormRules = {
-  title: [
-    (value:string) => {
-      if (value) return true
-      return '必填'
-    }
-  ],
-  content: [
-    (value:string) => {
-      if (value) return true
-      return '必填'
-    }
-  ],
-  createdAt: [
-    (value:Date) => {
-      return !!value;
-    }
-  ],
-  completedTime: [
-    (value:Date) => {
-      return !!value;
-    }
-  ]
+  title: [(value: string) => !!value || '必填'],
+  content: [(value: string) => !!value || '必填'],
+  createdAt: [(value: Date) => !!value],
+  completedTime: [(value: Date) => !!value]
 }
 
 const todoFormRef = ref<VForm | null>(null)
 
 const addTodoList = async () => {
-  const { valid } = await todoFormRef.value!.validate()
+  const { valid } = await todoFormRef.value?.validate() || { valid: false }
   if (valid) {
     createTodoList(addTodoListForm).then(res => {
       if (res.data.code === 200) {
