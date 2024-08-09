@@ -70,7 +70,7 @@ $day-tips-w-h : 10px;
         :weekdays="weekday"
       >
         <template #event="{ event }">
-          <div class="event-content">
+          <div class="event-content" @click="getDetail(event._id as string)">
             <div class="day-tips" :style="{ background: event.color as string }"></div>
             <span>&nbsp;&nbsp;{{ truncateTitle(event.title as string, 5) }}</span>
           </div>
@@ -78,15 +78,36 @@ $day-tips-w-h : 10px;
       </v-calendar>
     </v-sheet>
   </div>
+  <v-dialog
+    v-model="dialogStatus"
+    width="auto"
+  >
+    <v-card
+      max-width="400"
+      title="todoList detail"
+    >
+      <v-card-text>
+        {{ todoListDetail }}
+      </v-card-text>
+      <template v-slot:actions>
+        <v-btn
+          class="ms-auto"
+          text="close"
+          @click="dialogStatus = false"
+        ></v-btn>
+      </template>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup lang="ts">
 import { VCalendar } from 'vuetify/labs/VCalendar'
 import { VForm } from 'vuetify/components'
 import { onMounted, reactive, ref } from 'vue'
-import { getTodoListApi, createTodoList, TodoDto } from '../../api'
+import { getTodoListApi, createTodoList, TodoDto, todoDetail } from '../../api'
 
 interface Event {
+  _id?: string
   title: string
   start: Date
   end: Date
@@ -112,6 +133,7 @@ const getEvents = async ({ start, end }: { start: Date; end: Date }) => {
 
   result.data.data.forEach((todo: TodoDto) => {
     eventsList.push({
+      _id: todo._id,
       title: todo.title,
       start: new Date(todo.createdAt as Date), // 将 createdAt 转换为 Date 对象
       end: new Date(todo.completedTime as Date), // 将 completedTime 转换为 Date 对象
@@ -165,6 +187,22 @@ const addTodoList = async () => {
       }
     })
   }
+}
+
+const dialogStatus = ref<boolean>(false)
+let todoListDetail = reactive<TodoDto>({
+  title: '',
+  content: '',
+  createdAt: null,
+  effectiveTime: '',
+  isCompleted: false,
+  completedTime: null
+})
+const getDetail = (id:string) => {
+  dialogStatus.value = true
+  todoDetail({ id:id }).then(res => {
+    todoListDetail = res.data.data
+  })
 }
 
 const updateTodolist = () => {

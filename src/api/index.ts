@@ -8,6 +8,7 @@ export const getTodoListApi = () => {
 }
 
 export interface TodoDto {
+  _id?: string
   title: string
   content: string
   createdAt: Date | null
@@ -20,6 +21,14 @@ export const createTodoList = (data:TodoDto) => {
     url: '/todoList/createTodoList',
     method: 'post',
     data: data
+  })
+}
+
+export const todoDetail = (params: { id: string}) => {
+  return axios({
+    url: '/todoList/todoDetail',
+    method: 'post',
+    params
   })
 }
 
