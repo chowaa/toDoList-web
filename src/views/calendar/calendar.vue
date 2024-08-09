@@ -1,5 +1,5 @@
 <style scoped lang="scss">
-$day-tips-w-h : 10px;
+$day-tips-w-h: 10px;
 .event-content {
   display: flex;
   align-items: center;
@@ -178,14 +178,17 @@ const todoFormRef = ref<VForm | null>(null)
 const addTodoList = async () => {
   const { valid } = await todoFormRef.value?.validate() || { valid: false }
   if (valid) {
-    createTodoList(addTodoListForm).then(res => {
+    try {
+      const res = await createTodoList(addTodoListForm)
       if (res.data.code === 200) {
         changeAddStatus()
         updateTodolist()
       } else {
         alert(res.data.message)
       }
-    })
+    } catch (error) {
+      console.error('Error adding todo list:', error)
+    }
   }
 }
 
@@ -198,11 +201,14 @@ let todoListDetail = reactive<TodoDto>({
   isCompleted: false,
   completedTime: null
 })
-const getDetail = (id:string) => {
-  dialogStatus.value = true
-  todoDetail({ id:id }).then(res => {
+const getDetail = async (id: string) => {
+  try {
+    const res = await todoDetail({ id })
     todoListDetail = res.data.data
-  })
+    dialogStatus.value = true
+  } catch (error) {
+    console.error('Error fetching todo detail:', error)
+  }
 }
 
 const updateTodolist = () => {
